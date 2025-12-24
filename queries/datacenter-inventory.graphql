@@ -1,0 +1,112 @@
+query GetDatacenterInventory($datacenter_name: String!) {
+  InfraDatacenter(name__value: $datacenter_name) {
+    edges {
+      node {
+        id
+        name {
+          value
+        }
+        description {
+          value
+        }
+        city {
+          value
+        }
+        country {
+          value  
+        }
+        power_capacity_kw {
+          value
+        }
+        cooling_capacity_tons {
+          value
+        }
+        rooms {
+          edges {
+            node {
+              id
+              name {
+                value
+              }
+              room_type {
+                value
+              }
+              power_capacity_kw {
+                value
+              }
+              racks {
+                count
+                edges {
+                  node {
+                    id
+                    name {
+                      value
+                    }
+                    rack_units {
+                      value
+                    }
+                    servers {
+                      count
+                      edges {
+                        node {
+                          id
+                          name {
+                            value
+                          }
+                          hostname {
+                            value
+                          }
+                          server_type {
+                            value
+                          }
+                          cpu_cores {
+                            value
+                          }
+                          memory_gb {
+                            value
+                          }
+                          status {
+                            value
+                          }
+                          interfaces {
+                            count
+                            edges {
+                              node {
+                                name {
+                                  value
+                                }
+                                interface_type {
+                                  value
+                                }
+                                admin_status {
+                                  value
+                                }
+                                ip_addresses {
+                                  count
+                                  edges {
+                                    node {
+                                      address {
+                                        value
+                                      }
+                                      address_type {
+                                        value
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

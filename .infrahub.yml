@@ -1,0 +1,26 @@
+---
+# Infrahub repository configuration for on-premises compute infrastructure
+# This file defines what resources should be imported into Infrahub
+
+schemas:
+  # Physical infrastructure schemas
+  - schemas/physical-infrastructure.yml
+  # Network infrastructure schemas  
+  - schemas/network-infrastructure.yml
+  # Service infrastructure schemas
+  - schemas/service-infrastructure.yml
+
+objects:
+  # Sample data objects
+  - objects/
+
+queries:
+  # GraphQL queries for data retrieval
+  - queries/
+
+# Future extensions can be added here:
+# python_transforms: []
+# jinja2_transforms: []
+# check_definitions: []
+# generator_definitions: []
+# artifact_definitions: []

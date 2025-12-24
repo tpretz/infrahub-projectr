@@ -1,0 +1,496 @@
+---
+version: '1.0'
+
+# Service Infrastructure Schema
+# Models services, load balancers, virtual IPs, and service endpoints
+
+generics:
+  - name: ServiceEndpoint
+    namespace: Service
+    description: "Base properties for service endpoints"
+    icon: "mdi:web"
+    attributes:
+      - name: name
+        kind: Text
+        order_weight: 1000
+        description: "Service endpoint name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Service endpoint description"
+      - name: port
+        kind: Number
+        optional: false
+        order_weight: 1200
+        description: "Service port number"
+        parameters:
+          min_value: 1
+          max_value: 65535
+      - name: protocol
+        kind: Dropdown
+        optional: false
+        order_weight: 1300
+        description: "Network protocol"
+        choices:
+          - name: tcp
+            label: "TCP"
+            description: "Transmission Control Protocol"
+            color: "#007bff"
+          - name: udp
+            label: "UDP"
+            description: "User Datagram Protocol"
+            color: "#28a745"
+          - name: http
+            label: "HTTP"
+            description: "Hypertext Transfer Protocol"
+            color: "#fd7e14"
+          - name: https
+            label: "HTTPS"
+            description: "HTTP Secure"
+            color: "#6f42c1"
+          - name: ssh
+            label: "SSH"
+            description: "Secure Shell"
+            color: "#dc3545"
+      - name: health_check_enabled
+        kind: Boolean
+        optional: false
+        default_value: true
+        order_weight: 1400
+        description: "Whether health checking is enabled"
+      - name: health_check_path
+        kind: URL
+        optional: true
+        order_weight: 1500
+        description: "Health check endpoint path"
+      - name: health_check_interval_seconds
+        kind: Number
+        optional: true
+        order_weight: 1600
+        description: "Health check interval in seconds"
+        default_value: 30
+
+nodes:
+  - name: Service
+    namespace: Service
+    description: "Application service definition"
+    icon: "mdi:application"
+    label: "Service"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    human_friendly_id: ["name__value"]
+    attributes:
+      - name: name
+        kind: Text
+        unique: true
+        order_weight: 1000
+        description: "Service name"
+      - name: description
+        kind: TextArea
+        optional: true
+        order_weight: 1100
+        description: "Service description"
+      - name: service_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of service"
+        choices:
+          - name: web_server
+            label: "Web Server"
+            description: "HTTP/HTTPS web service"
+            color: "#007bff"
+          - name: database
+            label: "Database"
+            description: "Database service"
+            color: "#28a745"
+          - name: api
+            label: "API"
+            description: "API service"
+            color: "#6f42c1"
+          - name: microservice
+            label: "Microservice"
+            description: "Microservice component"
+            color: "#fd7e14"
+          - name: cache
+            label: "Cache"
+            description: "Caching service"
+            color: "#17a2b8"
+          - name: queue
+            label: "Message Queue"
+            description: "Message queue service"
+            color: "#ffc107"
+          - name: storage
+            label: "Storage"
+            description: "Storage service"
+            color: "#6c757d"
+      - name: environment
+        kind: Dropdown
+        optional: false
+        order_weight: 1300
+        description: "Deployment environment"
+        choices:
+          - name: production
+            label: "Production"
+            description: "Production environment"
+            color: "#dc3545"
+          - name: staging
+            label: "Staging"
+            description: "Staging environment"
+            color: "#ffc107"
+          - name: development
+            label: "Development"
+            description: "Development environment"
+            color: "#28a745"
+          - name: testing
+            label: "Testing"
+            description: "Testing environment"
+            color: "#17a2b8"
+      - name: status
+        kind: Dropdown
+        optional: false
+        order_weight: 1400
+        description: "Service status"
+        choices:
+          - name: active
+            label: "Active"
+            description: "Service is running"
+            color: "#28a745"
+          - name: inactive
+            label: "Inactive"
+            description: "Service is stopped"
+            color: "#dc3545"
+          - name: maintenance
+            label: "Maintenance"
+            description: "Under maintenance"
+            color: "#ffc107"
+          - name: deprecated
+            label: "Deprecated"
+            description: "Service is deprecated"
+            color: "#6c757d"
+
+  - name: ServiceInstance
+    namespace: Service
+    description: "Instance of a service running on a server"
+    icon: "mdi:server-network"
+    label: "Service Instance"
+    display_label: "{{ service.name__value }} on {{ server.name__value }}"
+    default_filter: "service__name__value"
+    inherit_from: ["ServiceServiceEndpoint"]
+    human_friendly_id: ["service__name__value", "server__name__value", "port__value"]
+    attributes:
+      - name: instance_id
+        kind: Text
+        optional: true
+        order_weight: 2000
+        description: "Unique instance identifier"
+      - name: config_path
+        kind: File
+        optional: true
+        order_weight: 2100
+        description: "Path to service configuration file"
+      - name: log_path
+        kind: File
+        optional: true
+        order_weight: 2200
+        description: "Path to service log file"
+      - name: process_id
+        kind: Number
+        optional: true
+        order_weight: 2300
+        description: "Process ID if running"
+      - name: auto_start
+        kind: Boolean
+        optional: false
+        default_value: true
+        order_weight: 2400
+        description: "Whether service starts automatically"
+    relationships:
+      - name: service
+        peer: ServiceService
+        kind: Attribute
+        cardinality: one
+        optional: false
+        order_weight: 3000
+        description: "Service definition"
+      - name: server
+        peer: InfraServer
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 3100
+        description: "Server hosting this service instance"
+      - name: ip_address
+        peer: InfraIPAddress
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 3200
+        description: "IP address service is bound to"
+    uniqueness_constraints:
+      - ["service", "server", "port__value"]
+
+  - name: LoadBalancer
+    namespace: Service
+    description: "Load balancer for distributing traffic"
+    icon: "mdi:scale-balance"
+    label: "Load Balancer"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    human_friendly_id: ["name__value"]
+    attributes:
+      - name: name
+        kind: Text
+        unique: true
+        order_weight: 1000
+        description: "Load balancer name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Load balancer description"
+      - name: lb_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of load balancer"
+        choices:
+          - name: hardware
+            label: "Hardware"
+            description: "Hardware load balancer"
+            color: "#007bff"
+          - name: software
+            label: "Software"
+            description: "Software load balancer"
+            color: "#28a745"
+          - name: cloud
+            label: "Cloud"
+            description: "Cloud-based load balancer"
+            color: "#6f42c1"
+      - name: algorithm
+        kind: Dropdown
+        optional: false
+        order_weight: 1300
+        description: "Load balancing algorithm"
+        choices:
+          - name: round_robin
+            label: "Round Robin"
+            description: "Distribute requests in order"
+            color: "#007bff"
+          - name: least_connections
+            label: "Least Connections"
+            description: "Route to server with fewest connections"
+            color: "#28a745"
+          - name: ip_hash
+            label: "IP Hash"
+            description: "Hash client IP for sticky sessions"
+            color: "#fd7e14"
+          - name: weighted
+            label: "Weighted"
+            description: "Weighted distribution"
+            color: "#6f42c1"
+      - name: session_persistence
+        kind: Boolean
+        optional: false
+        default_value: false
+        order_weight: 1400
+        description: "Enable session persistence/sticky sessions"
+      - name: ssl_termination
+        kind: Boolean
+        optional: false
+        default_value: false
+        order_weight: 1500
+        description: "Perform SSL termination"
+    relationships:
+      - name: server
+        peer: InfraServer
+        kind: Parent
+        cardinality: one
+        optional: true
+        order_weight: 2000
+        description: "Server hosting this load balancer"
+
+  - name: VirtualIP
+    namespace: Service
+    description: "Virtual IP address for high availability"
+    icon: "mdi:ip-network-outline"
+    label: "Virtual IP"
+    display_label: "{{ name__value }} ({{ ip_address.address__value }})"
+    default_filter: "name__value"
+    human_friendly_id: ["name__value"]
+    attributes:
+      - name: name
+        kind: Text
+        unique: true
+        order_weight: 1000
+        description: "Virtual IP name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Virtual IP description"
+      - name: vip_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of virtual IP"
+        choices:
+          - name: service
+            label: "Service VIP"
+            description: "Virtual IP for service access"
+            color: "#007bff"
+          - name: management
+            label: "Management VIP"
+            description: "Virtual IP for management"
+            color: "#28a745"
+          - name: cluster
+            label: "Cluster VIP"
+            description: "Virtual IP for cluster services"
+            color: "#6f42c1"
+      - name: priority
+        kind: Number
+        optional: true
+        order_weight: 1300
+        description: "VRRP/HSRP priority"
+        parameters:
+          min_value: 1
+          max_value: 255
+      - name: preempt
+        kind: Boolean
+        optional: false
+        default_value: true
+        order_weight: 1400
+        description: "Enable preemption"
+    relationships:
+      - name: ip_address
+        peer: InfraIPAddress
+        kind: Attribute
+        cardinality: one
+        optional: false
+        order_weight: 2000
+        description: "IP address for this VIP"
+      - name: load_balancer
+        peer: ServiceLoadBalancer
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "Load balancer using this VIP"
+
+  - name: LoadBalancerPool
+    namespace: Service
+    description: "Pool of servers behind a load balancer"
+    icon: "mdi:server-network"
+    label: "Load Balancer Pool"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    human_friendly_id: ["load_balancer__name__value", "name__value"]
+    attributes:
+      - name: name
+        kind: Text
+        order_weight: 1000
+        description: "Pool name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Pool description"
+      - name: health_check_enabled
+        kind: Boolean
+        optional: false
+        default_value: true
+        order_weight: 1200
+        description: "Enable health checking for pool members"
+      - name: health_check_method
+        kind: Dropdown
+        optional: true
+        order_weight: 1300
+        description: "Health check method"
+        choices:
+          - name: tcp
+            label: "TCP"
+            description: "TCP connection check"
+            color: "#007bff"
+          - name: http
+            label: "HTTP"
+            description: "HTTP GET request"
+            color: "#28a745"
+          - name: https
+            label: "HTTPS"
+            description: "HTTPS GET request"
+            color: "#6f42c1"
+          - name: icmp
+            label: "ICMP"
+            description: "ICMP ping"
+            color: "#fd7e14"
+    relationships:
+      - name: load_balancer
+        peer: ServiceLoadBalancer
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 2000
+        description: "Load balancer this pool belongs to"
+      - name: virtual_ip
+        peer: ServiceVirtualIP
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "Virtual IP for this pool"
+    uniqueness_constraints:
+      - ["load_balancer", "name__value"]
+
+  - name: PoolMember
+    namespace: Service
+    description: "Server member of a load balancer pool"
+    icon: "mdi:server"
+    label: "Pool Member"
+    display_label: "{{ pool.name__value }} - {{ service_instance.server.name__value }}"
+    default_filter: "pool__name__value"
+    human_friendly_id: ["pool__load_balancer__name__value", "pool__name__value", "service_instance__server__name__value"]
+    attributes:
+      - name: weight
+        kind: Number
+        optional: true
+        order_weight: 1000
+        description: "Weight for weighted load balancing"
+        default_value: 1
+        parameters:
+          min_value: 0
+          max_value: 100
+      - name: max_connections
+        kind: Number
+        optional: true
+        order_weight: 1100
+        description: "Maximum concurrent connections"
+      - name: enabled
+        kind: Boolean
+        optional: false
+        default_value: true
+        order_weight: 1200
+        description: "Whether this member is enabled"
+      - name: drain_mode
+        kind: Boolean
+        optional: false
+        default_value: false
+        order_weight: 1300
+        description: "Drain existing connections but accept no new ones"
+    relationships:
+      - name: pool
+        peer: ServiceLoadBalancerPool
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 2000
+        description: "Pool this member belongs to"
+      - name: service_instance
+        peer: ServiceServiceInstance
+        kind: Attribute
+        cardinality: one
+        optional: false
+        order_weight: 2100
+        description: "Service instance for this pool member"
+    uniqueness_constraints:
+      - ["pool", "service_instance"]

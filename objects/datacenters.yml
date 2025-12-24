@@ -1,0 +1,116 @@
+---
+# Sample Physical Infrastructure Objects
+
+- kind: InfraDatacenter
+  data:
+    name: 
+      value: "DC-NYC-01"
+    description:
+      value: "Primary New York datacenter facility"
+    address:
+      value: "123 Data Center Drive, New York, NY 10001"
+    city:
+      value: "New York"
+    country:
+      value: "United States"
+    power_capacity_kw:
+      value: 5000
+    cooling_capacity_tons:
+      value: 800
+    floor_space_sqm:
+      value: 2000
+    status:
+      value: "active"
+
+- kind: InfraDatacenter
+  data:
+    name: 
+      value: "DC-LON-01"
+    description:
+      value: "Primary London datacenter facility"
+    address:
+      value: "456 Tech Park Lane, London, E14 5HT"
+    city:
+      value: "London"
+    country:
+      value: "United Kingdom"
+    power_capacity_kw:
+      value: 3000
+    cooling_capacity_tons:
+      value: 500
+    floor_space_sqm:
+      value: 1500
+    status:
+      value: "active"
+
+- kind: InfraRoom
+  data:
+    name:
+      value: "Server-Room-A"
+    description:
+      value: "Main server hosting room"
+    room_type:
+      value: "server_room"
+    power_capacity_kw:
+      value: 1000
+    cooling_capacity_tons:
+      value: 200
+    status:
+      value: "active"
+    datacenter:
+      id: "DC-NYC-01"
+
+- kind: InfraRoom  
+  data:
+    name:
+      value: "Network-Room-B"
+    description:
+      value: "Network equipment room"
+    room_type:
+      value: "network_room"
+    power_capacity_kw:
+      value: 200
+    cooling_capacity_tons:
+      value: 40
+    status:
+      value: "active"
+    datacenter:
+      id: "DC-NYC-01"
+
+- kind: InfraRack
+  data:
+    name:
+      value: "Rack-A01"
+    description:
+      value: "Server rack in row A, position 1"
+    rack_units:
+      value: 42
+    power_capacity_watts:
+      value: 8000
+    row:
+      value: "A"
+    position:
+      value: "01"
+    status:
+      value: "active"
+    room:
+      hfid: ["DC-NYC-01", "Server-Room-A"]
+
+- kind: InfraRack
+  data:
+    name:
+      value: "Rack-A02"
+    description:
+      value: "Server rack in row A, position 2"
+    rack_units:
+      value: 42
+    power_capacity_watts:
+      value: 8000
+    row:
+      value: "A"  
+    position:
+      value: "02"
+    status:
+      value: "active"
+    room:
+      hfid: ["DC-NYC-01", "Server-Room-A"]

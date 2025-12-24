@@ -1,0 +1,419 @@
+---
+version: '1.0'
+
+# Network Infrastructure Schema  
+# Models network interfaces, VLANs, VRFs, IP networks, and connectivity
+
+generics:
+  - name: NetworkInterface
+    namespace: Infra
+    description: "Base properties for all network interfaces"
+    icon: "mdi:ethernet"
+    attributes:
+      - name: name
+        kind: Text
+        unique: false  # Will be unique per device
+        order_weight: 1000
+        description: "Interface name (e.g., eth0, GigE0/0/1)"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Interface description"
+      - name: interface_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of network interface"
+        choices:
+          - name: ethernet
+            label: "Ethernet"
+            description: "Standard ethernet interface"
+            color: "#007bff"
+          - name: fiber
+            label: "Fiber"
+            description: "Fiber optic interface"
+            color: "#28a745"
+          - name: wireless
+            label: "Wireless"
+            description: "Wireless interface"
+            color: "#6f42c1"
+          - name: virtual
+            label: "Virtual"
+            description: "Virtual/logical interface"
+            color: "#fd7e14"
+          - name: loopback
+            label: "Loopback"
+            description: "Loopback interface"
+            color: "#6c757d"
+      - name: speed_mbps
+        kind: Number
+        optional: true
+        order_weight: 1300
+        description: "Interface speed in Mbps"
+      - name: duplex
+        kind: Dropdown
+        optional: true
+        order_weight: 1400
+        description: "Interface duplex mode"
+        choices:
+          - name: full
+            label: "Full Duplex"
+            color: "#28a745"
+          - name: half
+            label: "Half Duplex"  
+            color: "#ffc107"
+          - name: auto
+            label: "Auto Negotiate"
+            color: "#007bff"
+      - name: admin_status
+        kind: Dropdown
+        optional: false
+        order_weight: 1500
+        description: "Administrative status"
+        choices:
+          - name: up
+            label: "Up"
+            description: "Administratively up"
+            color: "#28a745"
+          - name: down
+            label: "Down"
+            description: "Administratively down"
+            color: "#dc3545"
+      - name: operational_status
+        kind: Dropdown
+        optional: true
+        order_weight: 1600
+        description: "Operational status"
+        choices:
+          - name: up
+            label: "Up"
+            description: "Operationally up"
+            color: "#28a745"
+          - name: down
+            label: "Down"
+            description: "Operationally down"
+            color: "#dc3545"
+          - name: testing
+            label: "Testing"
+            description: "In testing mode"
+            color: "#ffc107"
+      - name: mac_address
+        kind: MacAddress
+        optional: true
+        order_weight: 1700
+        description: "MAC address of the interface"
+      - name: mtu
+        kind: Number
+        optional: true
+        order_weight: 1800
+        description: "Maximum Transmission Unit size"
+        default_value: 1500
+
+nodes:
+  - name: Interface
+    namespace: Infra  
+    description: "Network interface on a server or network device"
+    icon: "mdi:ethernet"
+    label: "Interface"
+    display_label: "{{ device.name__value }} - {{ name__value }}"
+    default_filter: "name__value"
+    inherit_from: ["InfraNetworkInterface"]
+    human_friendly_id: ["device__name__value", "name__value"]
+    relationships:
+      - name: device
+        peer: InfraServer
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 2000
+        description: "Server or device this interface belongs to"
+      - name: connected_interface
+        peer: InfraInterface
+        kind: Generic
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "Interface this is physically connected to"
+      - name: ip_addresses
+        peer: InfraIPAddress
+        kind: Component
+        cardinality: many
+        optional: true
+        order_weight: 2200
+        description: "IP addresses assigned to this interface"
+    uniqueness_constraints:
+      - ["device", "name__value"]
+
+  - name: VLAN
+    namespace: Infra
+    description: "Virtual LAN configuration"
+    icon: "mdi:lan"
+    label: "VLAN"
+    display_label: "VLAN {{ vlan_id__value }} - {{ name__value }}"
+    default_filter: "vlan_id__value"
+    human_friendly_id: ["vlan_id__value"]
+    attributes:
+      - name: vlan_id
+        kind: Number
+        unique: true
+        order_weight: 1000
+        description: "VLAN identifier (1-4094)"
+        parameters:
+          min_value: 1
+          max_value: 4094
+      - name: name
+        kind: Text
+        optional: false
+        order_weight: 1100
+        description: "VLAN name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1200
+        description: "VLAN description"
+      - name: status
+        kind: Dropdown
+        optional: false
+        order_weight: 1300
+        description: "VLAN status"
+        choices:
+          - name: active
+            label: "Active"
+            color: "#28a745"
+          - name: suspended
+            label: "Suspended"
+            color: "#ffc107"
+    relationships:
+      - name: vrf
+        peer: InfraVRF
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2000
+        description: "VRF this VLAN belongs to"
+
+  - name: VRF
+    namespace: Infra
+    description: "Virtual Routing and Forwarding instance"
+    icon: "mdi:router"
+    label: "VRF"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    human_friendly_id: ["name__value"]
+    attributes:
+      - name: name
+        kind: Text
+        unique: true
+        order_weight: 1000
+        description: "VRF name"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "VRF description"
+      - name: route_distinguisher
+        kind: Text
+        optional: true
+        unique: true
+        order_weight: 1200
+        description: "Route Distinguisher (RD)"
+      - name: route_target_import
+        kind: List
+        optional: true
+        order_weight: 1300
+        description: "Import route targets"
+      - name: route_target_export  
+        kind: List
+        optional: true
+        order_weight: 1400
+        description: "Export route targets"
+
+  - name: IPNetwork
+    namespace: Infra
+    description: "IP network/subnet definition"
+    icon: "mdi:ip-network"
+    label: "IP Network"
+    display_label: "{{ network__value }}"
+    default_filter: "network__value"
+    human_friendly_id: ["network__value"]
+    attributes:
+      - name: network
+        kind: IPNetwork
+        unique: true
+        order_weight: 1000
+        description: "Network address in CIDR notation"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "Network description"
+      - name: network_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of network"
+        choices:
+          - name: management
+            label: "Management"
+            description: "Management network"
+            color: "#007bff"
+          - name: production
+            label: "Production"
+            description: "Production traffic"
+            color: "#28a745"
+          - name: storage
+            label: "Storage"
+            description: "Storage network"
+            color: "#6f42c1"
+          - name: backup
+            label: "Backup"
+            description: "Backup network"
+            color: "#fd7e14"
+          - name: dmz
+            label: "DMZ"
+            description: "Demilitarized zone"
+            color: "#dc3545"
+    relationships:
+      - name: vlan
+        peer: InfraVLAN
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2000
+        description: "VLAN associated with this network"
+      - name: vrf
+        peer: InfraVRF
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "VRF this network belongs to"
+
+  - name: IPAddress
+    namespace: Infra
+    description: "Individual IP address assignment"
+    icon: "mdi:ip"
+    label: "IP Address"
+    display_label: "{{ address__value }}"
+    default_filter: "address__value"
+    human_friendly_id: ["address__value"]
+    attributes:
+      - name: address
+        kind: IPHost
+        unique: true
+        order_weight: 1000
+        description: "IP address"
+      - name: description
+        kind: Text
+        optional: true
+        order_weight: 1100
+        description: "IP address description/purpose"
+      - name: address_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1200
+        description: "Type of IP address"
+        choices:
+          - name: primary
+            label: "Primary"
+            description: "Primary interface address"
+            color: "#007bff"
+          - name: secondary
+            label: "Secondary"
+            description: "Secondary interface address"
+            color: "#28a745"
+          - name: virtual
+            label: "Virtual"
+            description: "Virtual IP address"
+            color: "#6f42c1"
+          - name: loopback
+            label: "Loopback"
+            description: "Loopback address"
+            color: "#fd7e14"
+    relationships:
+      - name: network
+        peer: InfraIPNetwork
+        kind: Attribute
+        cardinality: one
+        optional: false
+        order_weight: 2000
+        description: "Network this IP belongs to"
+      - name: interface
+        peer: InfraInterface
+        kind: Parent
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "Interface this IP is assigned to"
+
+  - name: Route
+    namespace: Infra
+    description: "Network routing entry"
+    icon: "mdi:map-marker-path"
+    label: "Route"
+    display_label: "{{ destination__value }} via {{ next_hop__value }}"
+    default_filter: "destination__value"
+    attributes:
+      - name: destination
+        kind: IPNetwork
+        order_weight: 1000
+        description: "Destination network"
+      - name: next_hop
+        kind: IPHost
+        optional: true
+        order_weight: 1100
+        description: "Next hop IP address"
+      - name: metric
+        kind: Number
+        optional: true
+        order_weight: 1200
+        description: "Route metric/cost"
+      - name: administrative_distance
+        kind: Number
+        optional: true
+        order_weight: 1300
+        description: "Administrative distance"
+      - name: route_type
+        kind: Dropdown
+        optional: false
+        order_weight: 1400
+        description: "Type of route"
+        choices:
+          - name: static
+            label: "Static"
+            description: "Statically configured route"
+            color: "#007bff"
+          - name: connected
+            label: "Connected"
+            description: "Directly connected route"
+            color: "#28a745"
+          - name: ospf
+            label: "OSPF"
+            description: "OSPF learned route"
+            color: "#fd7e14"
+          - name: bgp
+            label: "BGP"
+            description: "BGP learned route"
+            color: "#6f42c1"
+          - name: default
+            label: "Default"
+            description: "Default route"
+            color: "#dc3545"
+    relationships:
+      - name: vrf
+        peer: InfraVRF
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2000
+        description: "VRF this route belongs to"
+      - name: interface
+        peer: InfraInterface
+        kind: Attribute
+        cardinality: one
+        optional: true
+        order_weight: 2100
+        description: "Outbound interface for this route"
+    uniqueness_constraints:
+      - ["destination__value", "next_hop__value", "vrf"]

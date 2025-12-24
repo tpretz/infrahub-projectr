@@ -1,0 +1,226 @@
+---
+# Sample Network Infrastructure Objects
+
+# VRFs
+- kind: InfraVRF
+  data:
+    name:
+      value: "default"
+    description:
+      value: "Default VRF for general traffic"
+    route_distinguisher:
+      value: "65001:0"
+
+- kind: InfraVRF
+  data:
+    name:
+      value: "management"
+    description:
+      value: "Management VRF for out-of-band access"
+    route_distinguisher:
+      value: "65001:100"
+
+# VLANs  
+- kind: InfraVLAN
+  data:
+    vlan_id:
+      value: 100
+    name:
+      value: "production-web"
+    description:
+      value: "Production web servers VLAN"
+    status:
+      value: "active"
+    vrf:
+      hfid: ["default"]
+
+- kind: InfraVLAN
+  data:
+    vlan_id:
+      value: 200
+    name:
+      value: "production-db"
+    description:
+      value: "Production database servers VLAN"
+    status:
+      value: "active"
+    vrf:
+      hfid: ["default"]
+
+- kind: InfraVLAN
+  data:
+    vlan_id:
+      value: 10
+    name:
+      value: "management"
+    description:
+      value: "Management network VLAN"
+    status:
+      value: "active"
+    vrf:
+      hfid: ["management"]
+
+# IP Networks
+- kind: InfraIPNetwork
+  data:
+    network:
+      value: "192.168.100.0/24"
+    description:
+      value: "Production web servers network"
+    network_type:
+      value: "production"
+    vlan:
+      hfid: [100]
+    vrf:
+      hfid: ["default"]
+
+- kind: InfraIPNetwork
+  data:
+    network:
+      value: "192.168.200.0/24"
+    description:
+      value: "Production database servers network"
+    network_type:
+      value: "production"
+    vlan:
+      hfid: [200]
+    vrf:
+      hfid: ["default"]
+
+- kind: InfraIPNetwork
+  data:
+    network:
+      value: "10.0.1.0/24"
+    description:
+      value: "Management network for IPMI/iDRAC"
+    network_type:
+      value: "management"
+    vlan:
+      hfid: [10]
+    vrf:
+      hfid: ["management"]
+
+# Interfaces and IP Addresses
+- kind: InfraInterface
+  data:
+    name:
+      value: "eth0"
+    description:
+      value: "Primary network interface"
+    interface_type:
+      value: "ethernet"
+    speed_mbps:
+      value: 1000
+    duplex:
+      value: "full"
+    admin_status:
+      value: "up"
+    operational_status:
+      value: "up"
+    mtu:
+      value: 1500
+    device:
+      hfid: ["web-server-01"]
+
+- kind: InfraInterface
+  data:
+    name:
+      value: "eth1"
+    description:
+      value: "Secondary network interface"
+    interface_type:
+      value: "ethernet"
+    speed_mbps:
+      value: 1000
+    duplex:
+      value: "full"
+    admin_status:
+      value: "up"
+    operational_status:
+      value: "up"
+    mtu:
+      value: 1500
+    device:
+      hfid: ["web-server-01"]
+
+- kind: InfraInterface
+  data:
+    name:
+      value: "eth0"
+    description:
+      value: "Primary network interface"
+    interface_type:
+      value: "ethernet"
+    speed_mbps:
+      value: 1000
+    duplex:
+      value: "full"
+    admin_status:
+      value: "up"
+    operational_status:
+      value: "up"
+    mtu:
+      value: 1500
+    device:
+      hfid: ["web-server-02"]
+
+- kind: InfraInterface
+  data:
+    name:
+      value: "eth0"
+    description:
+      value: "Primary network interface"
+    interface_type:
+      value: "ethernet"
+    speed_mbps:
+      value: 10000
+    duplex:
+      value: "full"
+    admin_status:
+      value: "up"
+    operational_status:
+      value: "up"
+    mtu:
+      value: 9000
+    device:
+      hfid: ["db-server-01"]
+
+# IP Addresses
+- kind: InfraIPAddress
+  data:
+    address:
+      value: "192.168.100.10"
+    description:
+      value: "Primary IP for web-server-01"
+    address_type:
+      value: "primary"
+    network:
+      hfid: ["192.168.100.0/24"]
+    interface:
+      hfid: ["web-server-01", "eth0"]
+
+- kind: InfraIPAddress
+  data:
+    address:
+      value: "192.168.100.11"
+    description:
+      value: "Primary IP for web-server-02"
+    address_type:
+      value: "primary"
+    network:
+      hfid: ["192.168.100.0/24"]
+    interface:
+      hfid: ["web-server-02", "eth0"]
+
+- kind: InfraIPAddress
+  data:
+    address:
+      value: "192.168.200.10"
+    description:
+      value: "Primary IP for db-server-01"
+    address_type:
+      value: "primary"
+    network:
+      hfid: ["192.168.200.0/24"]
+    interface:
+      hfid: ["db-server-01", "eth0"]

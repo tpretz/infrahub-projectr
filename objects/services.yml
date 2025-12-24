@@ -1,0 +1,248 @@
+---
+# Sample Service Infrastructure Objects
+
+# Services
+- kind: ServiceService
+  data:
+    name:
+      value: "web-frontend"
+    description:
+      value: "Frontend web application serving customer traffic"
+    service_type:
+      value: "web_server"
+    environment:
+      value: "production"
+    status:
+      value: "active"
+
+- kind: ServiceService
+  data:
+    name:
+      value: "api-backend"
+    description:
+      value: "REST API backend for application services"
+    service_type:
+      value: "api"
+    environment:
+      value: "production"
+    status:
+      value: "active"
+
+- kind: ServiceService
+  data:
+    name:
+      value: "database-mysql"
+    description:
+      value: "MySQL database service"
+    service_type:
+      value: "database"
+    environment:
+      value: "production"
+    status:
+      value: "active"
+
+# Service Instances
+- kind: ServiceServiceInstance
+  data:
+    name:
+      value: "web-frontend-01"
+    description:
+      value: "Web frontend instance on server 1"
+    port:
+      value: 80
+    protocol:
+      value: "http"
+    health_check_enabled:
+      value: true
+    health_check_path:
+      value: "/health"
+    health_check_interval_seconds:
+      value: 30
+    instance_id:
+      value: "web-frontend-01"
+    config_path:
+      value: "/etc/nginx/nginx.conf"
+    log_path:
+      value: "/var/log/nginx/access.log"
+    auto_start:
+      value: true
+    service:
+      hfid: ["web-frontend"]
+    server:
+      hfid: ["web-server-01"]
+    ip_address:
+      hfid: ["192.168.100.10"]
+
+- kind: ServiceServiceInstance
+  data:
+    name:
+      value: "web-frontend-02"
+    description:
+      value: "Web frontend instance on server 2"
+    port:
+      value: 80
+    protocol:
+      value: "http"
+    health_check_enabled:
+      value: true
+    health_check_path:
+      value: "/health"
+    health_check_interval_seconds:
+      value: 30
+    instance_id:
+      value: "web-frontend-02"
+    config_path:
+      value: "/etc/nginx/nginx.conf"
+    log_path:
+      value: "/var/log/nginx/access.log"
+    auto_start:
+      value: true
+    service:
+      hfid: ["web-frontend"]
+    server:
+      hfid: ["web-server-02"]
+    ip_address:
+      hfid: ["192.168.100.11"]
+
+- kind: ServiceServiceInstance
+  data:
+    name:
+      value: "api-backend-01"
+    description:
+      value: "API backend instance on server 1"
+    port:
+      value: 8080
+    protocol:
+      value: "http"
+    health_check_enabled:
+      value: true
+    health_check_path:
+      value: "/api/health"
+    health_check_interval_seconds:
+      value: 15
+    instance_id:
+      value: "api-backend-01"
+    config_path:
+      value: "/opt/app/config.yml"
+    log_path:
+      value: "/var/log/app/api.log"
+    auto_start:
+      value: true
+    service:
+      hfid: ["api-backend"]
+    server:
+      hfid: ["web-server-01"]
+    ip_address:
+      hfid: ["192.168.100.10"]
+
+- kind: ServiceServiceInstance
+  data:
+    name:
+      value: "database-mysql-01"
+    description:
+      value: "MySQL database instance"
+    port:
+      value: 3306
+    protocol:
+      value: "tcp"
+    health_check_enabled:
+      value: true
+    health_check_interval_seconds:
+      value: 60
+    instance_id:
+      value: "mysql-01"
+    config_path:
+      value: "/etc/mysql/mysql.conf.d/mysqld.cnf"
+    log_path:
+      value: "/var/log/mysql/mysql.log"
+    auto_start:
+      value: true
+    service:
+      hfid: ["database-mysql"]
+    server:
+      hfid: ["db-server-01"]
+    ip_address:
+      hfid: ["192.168.200.10"]
+
+# Load Balancer
+- kind: ServiceLoadBalancer
+  data:
+    name:
+      value: "web-lb-01"
+    description:
+      value: "Primary web load balancer"
+    lb_type:
+      value: "software"
+    algorithm:
+      value: "round_robin"
+    session_persistence:
+      value: false
+    ssl_termination:
+      value: true
+    server:
+      hfid: ["lb-server-01"]
+
+# Virtual IP
+- kind: ServiceVirtualIP
+  data:
+    name:
+      value: "web-vip"
+    description:
+      value: "Virtual IP for web service access"
+    vip_type:
+      value: "service"
+    priority:
+      value: 100
+    preempt:
+      value: true
+    ip_address:
+      hfid: ["192.168.100.100"]
+    load_balancer:
+      hfid: ["web-lb-01"]
+
+# Load Balancer Pool
+- kind: ServiceLoadBalancerPool
+  data:
+    name:
+      value: "web-servers"
+    description:
+      value: "Pool of web servers"
+    health_check_enabled:
+      value: true
+    health_check_method:
+      value: "http"
+    load_balancer:
+      hfid: ["web-lb-01"]
+    virtual_ip:
+      hfid: ["web-vip"]
+
+# Pool Members
+- kind: ServicePoolMember
+  data:
+    weight:
+      value: 1
+    max_connections:
+      value: 1000
+    enabled:
+      value: true
+    drain_mode:
+      value: false
+    pool:
+      hfid: ["web-lb-01", "web-servers"]
+    service_instance:
+      hfid: ["web-frontend", "web-server-01", "80"]
+
+- kind: ServicePoolMember
+  data:
+    weight:
+      value: 1
+    max_connections:
+      value: 1000
+    enabled:
+      value: true
+    drain_mode:
+      value: false
+    pool:
+      hfid: ["web-lb-01", "web-servers"]
+    service_instance:
+      hfid: ["web-frontend", "web-server-02", "80"]

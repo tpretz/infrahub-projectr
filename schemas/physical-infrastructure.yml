@@ -1,0 +1,305 @@
+---
+version: '1.0'
+
+# Physical Infrastructure Schema
+# Models the physical compute infrastructure including locations, hardware, and their relationships
+
+generics:
+  - name: PhysicalAsset
+    namespace: Infra
+    description: "Base properties for all physical infrastructure assets"
+    icon: "mdi:server"
+    attributes:
+      - name: name
+        kind: Text
+        unique: true
+        order_weight: 1000
+        description: "Unique name identifier for the asset"
+      - name: description
+        kind: TextArea
+        optional: true
+        order_weight: 1100
+        description: "Detailed description of the asset"
+      - name: asset_tag
+        kind: Text
+        optional: true
+        unique: true
+        order_weight: 1200
+        description: "Physical asset tag or barcode identifier"
+      - name: serial_number
+        kind: Text
+        optional: true
+        order_weight: 1300
+        description: "Manufacturer serial number"
+      - name: manufacturer
+        kind: Text
+        optional: true
+        order_weight: 1400
+        description: "Equipment manufacturer"
+      - name: model
+        kind: Text
+        optional: true
+        order_weight: 1500
+        description: "Equipment model number"
+      - name: status
+        kind: Dropdown
+        optional: false
+        order_weight: 1600
+        description: "Current operational status"
+        choices:
+          - name: active
+            label: "Active"
+            description: "Operational and in use"
+            color: "#28a745"
+          - name: maintenance
+            label: "Maintenance"
+            description: "Under maintenance"
+            color: "#ffc107"
+          - name: decommissioned
+            label: "Decommissioned"
+            description: "Retired from service"
+            color: "#dc3545"
+          - name: planned
+            label: "Planned"
+            description: "Planned for deployment"
+            color: "#007bff"
+
+nodes:
+  - name: Datacenter
+    namespace: Infra
+    description: "Physical datacenter facility"
+    icon: "mdi:domain"
+    label: "Datacenter"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    inherit_from: ["InfraPhysicalAsset"]
+    attributes:
+      - name: address
+        kind: TextArea
+        optional: true
+        order_weight: 2000
+        description: "Physical street address"
+      - name: city
+        kind: Text
+        optional: true
+        order_weight: 2100
+        description: "City location"
+      - name: country
+        kind: Text
+        optional: true
+        order_weight: 2200
+        description: "Country location"
+      - name: power_capacity_kw
+        kind: Number
+        optional: true
+        order_weight: 2300
+        description: "Total power capacity in kilowatts"
+      - name: cooling_capacity_tons
+        kind: Number
+        optional: true
+        order_weight: 2400
+        description: "Cooling capacity in tons"
+      - name: floor_space_sqm
+        kind: Number
+        optional: true
+        order_weight: 2500
+        description: "Total floor space in square meters"
+
+  - name: Room
+    namespace: Infra
+    description: "Room within a datacenter"
+    icon: "mdi:floor-plan"
+    label: "Room"
+    display_label: "{{ datacenter.name__value }} - {{ name__value }}"
+    default_filter: "name__value"
+    inherit_from: ["InfraPhysicalAsset"]
+    attributes:
+      - name: room_type
+        kind: Dropdown
+        optional: false
+        order_weight: 2000
+        description: "Type of room"
+        choices:
+          - name: server_room
+            label: "Server Room"
+            description: "Main server hosting area"
+            color: "#007bff"
+          - name: network_room
+            label: "Network Room"
+            description: "Network equipment area"
+            color: "#28a745"
+          - name: storage_room
+            label: "Storage Room" 
+            description: "Storage equipment area"
+            color: "#6f42c1"
+          - name: utility_room
+            label: "Utility Room"
+            description: "Power/cooling equipment"
+            color: "#fd7e14"
+      - name: power_capacity_kw
+        kind: Number
+        optional: true
+        order_weight: 2100
+        description: "Room power capacity in kilowatts"
+      - name: cooling_capacity_tons
+        kind: Number
+        optional: true
+        order_weight: 2200
+        description: "Room cooling capacity in tons"
+    relationships:
+      - name: datacenter
+        peer: InfraDatacenter
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 3000
+        description: "Datacenter containing this room"
+
+  - name: Rack
+    namespace: Infra
+    description: "Server rack for mounting equipment"
+    icon: "mdi:server-outline"
+    label: "Rack"
+    display_label: "{{ room.datacenter.name__value }} - {{ room.name__value }} - {{ name__value }}"
+    default_filter: "name__value"
+    inherit_from: ["InfraPhysicalAsset"]
+    attributes:
+      - name: rack_units
+        kind: Number
+        optional: false
+        order_weight: 2000
+        description: "Total rack units (U) available"
+        default_value: 42
+      - name: power_capacity_watts
+        kind: Number
+        optional: true
+        order_weight: 2100
+        description: "Total power capacity in watts"
+      - name: row
+        kind: Text
+        optional: true
+        order_weight: 2200
+        description: "Row identifier within the room"
+      - name: position
+        kind: Text
+        optional: true
+        order_weight: 2300
+        description: "Position within the row"
+    relationships:
+      - name: room
+        peer: InfraRoom
+        kind: Parent
+        cardinality: one
+        optional: false
+        order_weight: 3000
+        description: "Room containing this rack"
+    uniqueness_constraints:
+      - ["room", "name__value"]
+
+  - name: Server
+    namespace: Infra
+    description: "Physical server hardware"
+    icon: "mdi:server"
+    label: "Server"
+    display_label: "{{ name__value }}"
+    default_filter: "name__value"
+    inherit_from: ["InfraPhysicalAsset"]
+    human_friendly_id: ["name__value"]
+    attributes:
+      - name: hostname
+        kind: Text
+        optional: true
+        order_weight: 2000
+        description: "Network hostname"
+      - name: server_type
+        kind: Dropdown
+        optional: false
+        order_weight: 2100
+        description: "Type of server"
+        choices:
+          - name: physical
+            label: "Physical Server"
+            description: "Bare metal physical server"
+            color: "#007bff"
+          - name: blade
+            label: "Blade Server"
+            description: "Blade server in chassis"
+            color: "#28a745"
+          - name: hypervisor
+            label: "Hypervisor"
+            description: "Virtualization host"
+            color: "#6f42c1"
+      - name: cpu_model
+        kind: Text
+        optional: true
+        order_weight: 2200
+        description: "CPU model and specifications"
+      - name: cpu_cores
+        kind: Number
+        optional: true
+        order_weight: 2300
+        description: "Total number of CPU cores"
+      - name: memory_gb
+        kind: Number
+        optional: true
+        order_weight: 2400
+        description: "Total memory in gigabytes"
+      - name: storage_type
+        kind: Dropdown
+        optional: true
+        order_weight: 2500
+        description: "Primary storage type"
+        choices:
+          - name: ssd
+            label: "SSD"
+            description: "Solid State Drive"
+            color: "#28a745"
+          - name: hdd
+            label: "HDD"
+            description: "Hard Disk Drive"
+            color: "#6c757d"
+          - name: nvme
+            label: "NVMe"
+            description: "NVMe SSD"
+            color: "#007bff"
+          - name: mixed
+            label: "Mixed"
+            description: "Multiple storage types"
+            color: "#fd7e14"
+      - name: storage_capacity_gb
+        kind: Number
+        optional: true
+        order_weight: 2600
+        description: "Total storage capacity in gigabytes"
+      - name: rack_position_start
+        kind: Number
+        optional: true
+        order_weight: 2700
+        description: "Starting rack unit position"
+      - name: rack_units_used
+        kind: Number
+        optional: true
+        order_weight: 2800
+        description: "Number of rack units consumed"
+        default_value: 1
+      - name: power_consumption_watts
+        kind: Number
+        optional: true
+        order_weight: 2900
+        description: "Power consumption in watts"
+      - name: management_ip
+        kind: IPHost
+        optional: true
+        order_weight: 3000
+        description: "Out-of-band management IP address"
+    relationships:
+      - name: rack
+        peer: InfraRack
+        kind: Parent
+        cardinality: one
+        optional: true
+        order_weight: 4000
+        description: "Rack containing this server"
+    uniqueness_constraints:
+      - ["name__value"]
+      - ["hostname__value"]

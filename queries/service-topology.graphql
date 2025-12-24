@@ -1,0 +1,127 @@
+query GetServiceTopology($service_name: String!) {
+  ServiceService(name__value: $service_name) {
+    edges {
+      node {
+        id
+        name {
+          value
+        }
+        description {
+          value
+        }
+        service_type {
+          value
+        }
+        environment {
+          value
+        }
+        status {
+          value
+        }
+        instances: ServiceServiceInstance {
+          count
+          edges {
+            node {
+              id
+              name {
+                value
+              }
+              port {
+                value
+              }
+              protocol {
+                value
+              }
+              health_check_enabled {
+                value
+              }
+              server {
+                id
+                name {
+                  value
+                }
+                hostname {
+                  value
+                }
+                rack {
+                  name {
+                    value
+                  }
+                  room {
+                    name {
+                      value
+                    }
+                    datacenter {
+                      name {
+                        value
+                      }
+                    }
+                  }
+                }
+              }
+              ip_address {
+                address {
+                  value
+                }
+                network {
+                  network {
+                    value
+                  }
+                  vlan {
+                    vlan_id {
+                      value
+                    }
+                    name {
+                      value
+                    }
+                  }
+                }
+              }
+              pool_memberships: ServicePoolMember {
+                count
+                edges {
+                  node {
+                    weight {
+                      value
+                    }
+                    enabled {
+                      value
+                    }
+                    pool {
+                      name {
+                        value
+                      }
+                      load_balancer {
+                        name {
+                          value
+                        }
+                        algorithm {
+                          value
+                        }
+                        server {
+                          name {
+                            value
+                          }
+                        }
+                      }
+                      virtual_ip {
+                        name {
+                          value
+                        }
+                        ip_address {
+                          address {
+                            value
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

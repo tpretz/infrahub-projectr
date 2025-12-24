@@ -1,0 +1,158 @@
+---
+# Sample Server Infrastructure Objects
+
+- kind: InfraServer
+  data:
+    name:
+      value: "web-server-01"
+    hostname:
+      value: "web01.nyc.company.com"
+    description:
+      value: "Primary web server for production applications"
+    server_type:
+      value: "physical"
+    manufacturer:
+      value: "Dell"
+    model:
+      value: "PowerEdge R750"
+    serial_number:
+      value: "DL7501234567"
+    cpu_model:
+      value: "Intel Xeon Gold 6338"
+    cpu_cores:
+      value: 64
+    memory_gb:
+      value: 256
+    storage_type:
+      value: "nvme"
+    storage_capacity_gb:
+      value: 2048
+    rack_position_start:
+      value: 10
+    rack_units_used:
+      value: 2
+    power_consumption_watts:
+      value: 500
+    management_ip:
+      value: "10.0.1.10"
+    status:
+      value: "active"
+    rack:
+      hfid: ["DC-NYC-01", "Server-Room-A", "Rack-A01"]
+
+- kind: InfraServer
+  data:
+    name:
+      value: "web-server-02"
+    hostname:
+      value: "web02.nyc.company.com"
+    description:
+      value: "Secondary web server for production applications"
+    server_type:
+      value: "physical"
+    manufacturer:
+      value: "Dell"
+    model:
+      value: "PowerEdge R750"
+    serial_number:
+      value: "DL7501234568"
+    cpu_model:
+      value: "Intel Xeon Gold 6338"
+    cpu_cores:
+      value: 64
+    memory_gb:
+      value: 256
+    storage_type:
+      value: "nvme"
+    storage_capacity_gb:
+      value: 2048
+    rack_position_start:
+      value: 12
+    rack_units_used:
+      value: 2
+    power_consumption_watts:
+      value: 500
+    management_ip:
+      value: "10.0.1.11"
+    status:
+      value: "active"
+    rack:
+      hfid: ["DC-NYC-01", "Server-Room-A", "Rack-A01"]
+
+- kind: InfraServer
+  data:
+    name:
+      value: "db-server-01"
+    hostname:
+      value: "db01.nyc.company.com"
+    description:
+      value: "Primary database server"
+    server_type:
+      value: "physical"
+    manufacturer:
+      value: "HP"
+    model:
+      value: "ProLiant DL380 Gen10"
+    serial_number:
+      value: "HP3801234567"
+    cpu_model:
+      value: "Intel Xeon Gold 6242"
+    cpu_cores:
+      value: 32
+    memory_gb:
+      value: 512
+    storage_type:
+      value: "mixed"
+    storage_capacity_gb:
+      value: 8192
+    rack_position_start:
+      value: 20
+    rack_units_used:
+      value: 2
+    power_consumption_watts:
+      value: 600
+    management_ip:
+      value: "10.0.1.20"
+    status:
+      value: "active"
+    rack:
+      hfid: ["DC-NYC-01", "Server-Room-A", "Rack-A02"]
+
+- kind: InfraServer
+  data:
+    name:
+      value: "lb-server-01"
+    hostname:
+      value: "lb01.nyc.company.com"
+    description:
+      value: "Primary load balancer server"
+    server_type:
+      value: "physical"
+    manufacturer:
+      value: "Dell"
+    model:
+      value: "PowerEdge R640"
+    serial_number:
+      value: "DL6401234567"
+    cpu_model:
+      value: "Intel Xeon Silver 4214"
+    cpu_cores:
+      value: 24
+    memory_gb:
+      value: 128
+    storage_type:
+      value: "ssd"
+    storage_capacity_gb:
+      value: 1024
+    rack_position_start:
+      value: 5
+    rack_units_used:
+      value: 1
+    power_consumption_watts:
+      value: 350
+    management_ip:
+      value: "10.0.1.5"
+    status:
+      value: "active"
+    rack:
+      hfid: ["DC-NYC-01", "Server-Room-A", "Rack-A01"]
